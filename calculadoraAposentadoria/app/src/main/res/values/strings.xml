@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">calculadoraAposentadoria</string>
+    <string name="calcular_idade">Calcular</string>
+    <string name="titulo">Calcule quanto tempo falta para sua aponsetadoria!</string>
 </resources>
