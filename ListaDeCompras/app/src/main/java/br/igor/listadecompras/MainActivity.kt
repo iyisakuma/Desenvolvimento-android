@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import br.igor.listadecompras.adapter.ItensAdapter
 import br.igor.listadecompras.model.Item
+import br.igor.listadecompras.viewmodel.ItemViewModel
 import java.math.BigDecimal
 
 class MainActivity : ComponentActivity() {
@@ -17,27 +20,27 @@ class MainActivity : ComponentActivity() {
     private lateinit var rvProdutos: RecyclerView
     private lateinit var etPrecoUnitario: EditText
     private lateinit var etQuantidade: EditText
-
-
-    private val itensAdapter: ItensAdapter = ItensAdapter()
+    val viewModel: ItemViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupAllComponents()
         addEventsHandler()
+        viewModel.itensLiveData.observe(this) { items ->
+            (rvProdutos.adapter as ItensAdapter).updateItens(items)
+        }
     }
 
     private fun addEventsHandler() {
         btAdicionar.setOnClickListener {
-            if (validaInformacoes()) {
+            if (!validaInformacoes()) {
                 return@setOnClickListener
             }
             val nomeProduto = etNome.text.toString()
             val quantidade = etQuantidade.text.toString().toInt()
             val precoUnit = BigDecimal(etPrecoUnitario.text.toString())
-            val item = Item(nomeProduto, quantidade, precoUnit)
-            itensAdapter.addItem(item)
+            viewModel.add(nomeProduto, quantidade, precoUnit)
             etNome.text.clear()
             etQuantidade.text.clear()
             etPrecoUnitario.text.clear()
@@ -90,7 +93,6 @@ class MainActivity : ComponentActivity() {
         rvProdutos = findViewById(R.id.rv_produtos)
         etPrecoUnitario = findViewById(R.id.et_preco_unitario)
         etQuantidade = findViewById(R.id.et_quantidade)
-
-        rvProdutos.adapter = itensAdapter
+        rvProdutos.adapter = ItensAdapter()
     }
 }

@@ -13,7 +13,8 @@ import java.text.DecimalFormat
 
 class ItensAdapter : RecyclerView.Adapter<ItensAdapter.ItemViewHolder>() {
 
-    private val itens = mutableListOf<Item>()
+    private var itens = listOf<Item>()
+
     class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nomeItem = itemView.findViewById<TextView>(R.id.tv_nome_item)
         val itemPosition = itemView.findViewById<TextView>(R.id.tv_position_item)
@@ -21,17 +22,17 @@ class ItensAdapter : RecyclerView.Adapter<ItensAdapter.ItemViewHolder>() {
         val precoUnitario = itemView.findViewById<TextView>(R.id.tv_preco_unitario)
         val precoTotal = itemView.findViewById<TextView>(R.id.tv_preco_total)
         val fabExclude = itemView.findViewById<FloatingActionButton>(R.id.fab_remove)
-        fun bind(item: Item, position: Int, itensAdapter: ItensAdapter) {
-            fabExclude.setOnClickListener{
-                itensAdapter.removeItem(position)
+        fun bind(item: Item, position: Int) {
+            fabExclude.setOnClickListener {
+                item.onRemove
             }
+            val precoTotal = item.preco.multiply(BigDecimal(item.quantidade))
+            val decimalFormat = DecimalFormat("0.00")
             itemPosition.text = position.toString()
             nomeItem.text = item.name
             quantidade.text = item.quantidade.toString()
-            precoUnitario.text = item.preco.toString()
-            val precoTotal = item.preco.multiply(BigDecimal(item.quantidade))
-            val decimalFormat = DecimalFormat("####,##")
-            this.precoTotal.text = decimalFormat.format(precoTotal)
+            precoUnitario.text =  "R$ ${decimalFormat.format(item.preco).replace(".", ",")}"
+            this.precoTotal.text = "R$ ${decimalFormat.format(precoTotal).replace(".", ",")}"
         }
 
     }
@@ -53,18 +54,13 @@ class ItensAdapter : RecyclerView.Adapter<ItensAdapter.ItemViewHolder>() {
         val item = itens[position]
         holder.bind(
             item,
-            position,
-            this
+            position
         )
     }
 
-    fun addItem(newItem: Item){
-        itens.add(newItem)
+    fun updateItens(itens: List<Item>) {
+        this.itens = itens
         notifyDataSetChanged()
     }
 
-    fun removeItem(position: Int){
-        itens.removeAt(position)
-        notifyDataSetChanged()
-    }
 }
